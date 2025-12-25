@@ -1,0 +1,1478 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+    <!-- Primary Meta Tags -->
+    <title>HN Reading List – Track Your Monthly Hacker News Reading</title>
+    <meta name="title" content="HN Reading List – Track Your Monthly Hacker News Reading" />
+    <meta name="description"
+        content="A simple, private reading list for Hacker News. Browse top posts by month, track your reading progress, and sync across browsers. Single HTML file, no server required." />
+    <meta name="keywords"
+        content="Hacker News, HN, reading list, news reader, tech news, productivity, bookmarks, reading tracker" />
+    <meta name="author" content="Faisal Nutabish" />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#f97316" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://taabishm2.github.io/readhn/" />
+    <meta property="og:title" content="HN Reading List – Track Your Monthly Hacker News Reading" />
+    <meta property="og:description"
+        content="A simple, private reading list for Hacker News. Browse top posts by month, track your reading progress, and sync across browsers." />
+    <meta property="og:image" content="https://opengraph.githubassets.com/1/taabishm2/readhn" />
+    <meta property="og:site_name" content="HN Reading List" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="HN Reading List – Track Your Monthly Hacker News Reading" />
+    <meta name="twitter:description"
+        content="A simple, private reading list for Hacker News. Browse top posts by month, track your reading progress, and sync across browsers." />
+    <meta name="twitter:image" content="https://opengraph.githubassets.com/1/taabishm2/readhn" />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://taabishm2.github.io/readhn/" />
+    
+    <!-- Google Search Console verification - Replace YOUR_VERIFICATION_CODE with actual code -->
+    <!-- <meta name="google-site-verification" content="YOUR_VERIFICATION_CODE" /> -->
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "HN Reading List",
+        "description": "A simple, private reading list for Hacker News. Browse top posts by month, track your reading progress, and sync across browsers.",
+        "applicationCategory": "Productivity",
+        "operatingSystem": "Any",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "featureList": [
+            "Monthly view of top Hacker News posts",
+            "Read/unread tracking",
+            "Cross-browser sync via GitHub Gist",
+            "Works offline",
+            "No account required"
+        ]
+    }
+    </script>
+
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23ff6600' width='100' height='100' rx='12'/><text x='50' y='68' font-size='55' font-weight='bold' fill='white' text-anchor='middle' font-family='sans-serif'>R</text></svg>">
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --surface-hover: #f1f5f9;
+            --border: #e2e8f0;
+            --text: #0f172a;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --accent: #f97316;
+            --accent-hover: #ea580c;
+            --accent-light: #fff7ed;
+            --green: #10b981;
+            --green-light: #d1fae5;
+            --blue: #3b82f6;
+            --blue-light: #dbeafe;
+            --red: #ef4444;
+            --red-light: #fee2e2;
+            --radius: 10px;
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px 16px;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo {
+            width: 28px;
+            height: 28px;
+            background: var(--accent);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        header h1 {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        /* Sync status in header */
+        .header-sync {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sync-indicator {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            color: var(--text-muted);
+            padding: 4px 10px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .sync-indicator:hover {
+            border-color: var(--text-muted);
+        }
+
+        .sync-indicator.synced {
+            color: var(--green);
+            border-color: var(--green-light);
+            background: var(--green-light);
+        }
+
+        .sync-indicator.syncing {
+            color: var(--blue);
+            border-color: var(--blue-light);
+            background: var(--blue-light);
+        }
+
+        .sync-indicator.error {
+            color: var(--red);
+            border-color: var(--red-light);
+            background: var(--red-light);
+        }
+
+        .sync-indicator.offline {
+            color: var(--text-muted);
+        }
+
+        .sync-indicator svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .sync-indicator.syncing svg {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Controls */
+        .controls {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 12px 16px;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .controls-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .complete-msg {
+            font-size: 12px;
+            color: var(--green);
+            font-weight: 500;
+            display: none;
+        }
+
+        .nav-btns {
+            display: flex;
+            gap: 4px;
+        }
+
+        .nav-btn {
+            width: 32px;
+            height: 32px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--surface);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all 0.15s;
+        }
+
+        .nav-btn:hover {
+            background: var(--surface-hover);
+            color: var(--text);
+            border-color: var(--text-muted);
+        }
+
+        input[type="month"],
+        select {
+            font-family: inherit;
+            font-size: 13px;
+            padding: 6px 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--surface);
+            color: var(--text);
+            height: 32px;
+        }
+
+        input[type="month"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        select {
+            cursor: pointer;
+        }
+
+        .spacer {
+            flex: 1;
+        }
+
+        /* Progress bar */
+        .progress-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .progress-bar {
+            width: 80px;
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--green);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            white-space: nowrap;
+        }
+
+        /* Settings panel */
+        .settings-panel {
+            margin-top: 12px;
+            padding: 12px;
+            background: var(--bg);
+            border-radius: 8px;
+            display: none;
+        }
+
+        .settings-panel.open {
+            display: block;
+        }
+
+        .settings-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .settings-panel input[type="password"],
+        .settings-panel input[type="text"] {
+            flex: 1;
+            font-family: inherit;
+            font-size: 13px;
+            padding: 8px 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--surface);
+        }
+
+        .settings-panel input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .settings-panel .sync-info {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .settings-panel .sync-info .info-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+
+        .settings-panel .sync-info .info-icon {
+            flex-shrink: 0;
+            font-size: 14px;
+        }
+
+        .settings-panel .sync-info a {
+            color: var(--blue);
+        }
+
+        .settings-panel .help-text {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+
+        .settings-panel .help-text a {
+            color: var(--blue);
+            cursor: pointer;
+            margin-right: 12px;
+        }
+
+        .settings-panel .help-text a:hover {
+            text-decoration: underline;
+        }
+
+        .settings-panel .help-text #disconnectLink {
+            color: var(--red);
+        }
+
+        .btn {
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 8px 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-secondary);
+            padding: 8px;
+        }
+
+        .btn-ghost:hover {
+            background: var(--surface-hover);
+            color: var(--text);
+        }
+
+        .btn-danger {
+            background: transparent;
+            color: var(--red);
+            padding: 8px 12px;
+        }
+
+        .btn-danger:hover {
+            background: var(--red-light);
+        }
+
+        /* Error message */
+        .error-msg {
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            margin-top: 10px;
+            background: var(--red-light);
+            color: var(--red);
+            display: none;
+        }
+
+        .error-msg:not(:empty) {
+            display: block;
+        }
+
+        /* Results */
+        .results {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .results:empty {
+            display: none;
+        }
+
+        .story {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            transition: background 0.1s;
+        }
+
+        .story:last-child {
+            border-bottom: none;
+        }
+
+        .story:hover {
+            background: var(--surface-hover);
+        }
+
+        /* Read state - subtle checkmark and muted text */
+        .story.status-read .story-title a {
+            color: var(--text-muted);
+        }
+
+        .story.status-read .read-check {
+            display: flex;
+        }
+
+        .read-check {
+            display: none;
+            width: 16px;
+            height: 16px;
+            background: var(--green);
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .read-check svg {
+            width: 10px;
+            height: 10px;
+            color: white;
+        }
+
+        /* Unread - just normal styling, no special background */
+        .story.status-unread .story-title a {
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .rank {
+            min-width: 24px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        .story-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .story-title {
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .story-title a {
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .story-title a:hover {
+            color: var(--accent);
+        }
+
+        .story-meta {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .story-meta .comments-link {
+            color: var(--text-muted);
+            text-decoration: none;
+        }
+
+        .story-meta .comments-link:hover {
+            color: var(--accent);
+            text-decoration: underline;
+        }
+
+        .story-actions {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            opacity: 0;
+            transition: opacity 0.15s;
+        }
+
+        .story:hover .story-actions {
+            opacity: 1;
+        }
+
+        .action-btn {
+            height: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            padding: 0 8px;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.15s;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .action-btn.btn-icon-only {
+            width: 26px;
+            padding: 0;
+        }
+
+        .action-btn:hover {
+            background: var(--surface-hover);
+            color: var(--text);
+        }
+
+        .action-btn.btn-read:hover {
+            background: var(--green-light);
+            color: var(--green);
+        }
+
+        .action-btn.btn-unread:hover {
+            background: var(--blue-light);
+            color: var(--blue);
+        }
+
+        .action-btn.btn-ignore:hover {
+            background: var(--red-light);
+            color: var(--red);
+        }
+
+        .action-btn svg {
+            width: 14px;
+            height: 14px;
+            flex-shrink: 0;
+        }
+
+        .action-btn span {
+            white-space: nowrap;
+        }
+
+        .action-btn-icon {
+            width: 16px;
+            height: 16px;
+        }
+
+        .empty-state {
+            padding: 48px 20px;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        .empty-state-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        /* Loading spinner */
+        .spinner {
+            width: 14px;
+            height: 14px;
+            border: 2px solid transparent;
+            border-top-color: currentColor;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        /* Loading skeleton */
+        .skeleton {
+            background: linear-gradient(90deg, var(--surface-hover) 25%, var(--border) 50%, var(--surface-hover) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 4px;
+        }
+
+        .skeleton-story {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .skeleton-rank {
+            width: 24px;
+            height: 16px;
+        }
+
+        .skeleton-body {
+            flex: 1;
+        }
+
+        .skeleton-title {
+            height: 16px;
+            width: 70%;
+            margin-bottom: 6px;
+        }
+
+        .skeleton-meta {
+            height: 12px;
+            width: 30%;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        /* Read/unread animation */
+        .story {
+            transition: background 0.2s ease, transform 0.15s ease;
+        }
+
+        .story.just-changed {
+            animation: flash 0.4s ease;
+        }
+
+        @keyframes flash {
+            0% {
+                background: var(--green-light);
+                transform: scale(1.01);
+            }
+
+            100% {
+                background: transparent;
+                transform: scale(1);
+            }
+        }
+
+        /* Confirm dialog */
+        .confirm-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .confirm-dialog {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 20px;
+            max-width: 360px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .confirm-dialog h3 {
+            font-size: 15px;
+            margin-bottom: 6px;
+        }
+
+        .confirm-dialog p {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+
+        .confirm-dialog .dialog-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        /* Mobile */
+        @media (max-width: 640px) {
+            .container {
+                padding: 12px;
+            }
+
+            .story {
+                padding: 10px 12px;
+            }
+
+            .story-actions {
+                opacity: 1;
+            }
+
+            .progress-wrap {
+                order: 10;
+                width: 100%;
+                margin-top: 8px;
+                justify-content: flex-end;
+            }
+
+            .complete-msg {
+                order: 9;
+            }
+
+            .spacer {
+                display: none;
+            }
+
+            header h1 {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- SEO: Hidden content for crawlers (since app is JS-rendered) -->
+    <noscript>
+        <div style="max-width: 800px; margin: 40px auto; padding: 20px; font-family: system-ui, sans-serif;">
+            <h1>HN Reading List</h1>
+            <p>A simple, private reading list for Hacker News.</p>
+            <h2>Features</h2>
+            <ul>
+                <li><strong>Monthly View</strong> – Browse the top Hacker News posts from any month, sorted by points
+                </li>
+                <li><strong>Reading Tracker</strong> – Mark posts as read, unread, or hide them permanently</li>
+                <li><strong>Set Goals</strong> – Choose to read 15, 25, 50, or 100 posts per month</li>
+                <li><strong>Cross-Browser Sync</strong> – Sync your progress across devices using your own private
+                    GitHub Gist</li>
+                <li><strong>Privacy First</strong> – No server, no account, no tracking. Your data stays in your browser
+                </li>
+                <li><strong>Works Offline</strong> – State persists in localStorage</li>
+            </ul>
+            <h2>How It Works</h2>
+            <p>HN Reading List uses the Algolia Hacker News API to fetch stories. Your reading progress is stored
+                locally and can optionally sync to a private GitHub Gist for cross-browser access.</p>
+            <p><strong>Please enable JavaScript to use this application.</strong></p>
+        </div>
+    </noscript>
+
+    <main class="container" role="main">
+        <header>
+            <div class="header-left">
+                <div class="logo" aria-hidden="true">R</div>
+                <h1>HN Reading List</h1>
+            </div>
+            <div class="header-sync">
+                <button class="nav-btn" id="resetDataBtn" title="Clear all reading progress"
+                    aria-label="Reset all data">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"
+                        aria-hidden="true">
+                        <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14" />
+                    </svg>
+                </button>
+                <button class="sync-indicator offline" id="syncIndicator" title="Click to configure sync"
+                    aria-label="Sync settings">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path
+                            d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83" />
+                    </svg>
+                    <span>Offline</span>
+                </button>
+            </div>
+        </header>
+
+        <nav class="controls" aria-label="Month navigation and settings">
+            <div class="controls-row">
+                <div class="nav-btns">
+                    <button class="nav-btn" id="prevMonth" title="Previous month (← key)"
+                        aria-label="Previous month">←</button>
+                    <button class="nav-btn" id="nextMonth" title="Next month (→ key)" aria-label="Next month">→</button>
+                </div>
+
+                <input type="month" id="monthInput" title="Select month to view" aria-label="Select month" />
+
+                <select id="topN" title="Monthly reading goal" aria-label="Reading goal">
+                    <option value="15" selected>Goal: 15</option>
+                    <option value="25">Goal: 25</option>
+                    <option value="50">Goal: 50</option>
+                    <option value="100">Goal: 100</option>
+                </select>
+
+                <div class="spacer"></div>
+
+                <span class="complete-msg" id="completeMsg"></span>
+                <div class="progress-wrap" id="progressWrap">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <span class="progress-text" id="progressText">0/0</span>
+                </div>
+            </div>
+
+            <div class="settings-panel" id="settingsPanel">
+                <div class="sync-info">
+                    <div class="info-item">
+                        <span>Sync reading progress across browsers via <a
+                                href="https://docs.github.com/en/get-started/writing-on-github/editing-and-sharing-content-with-gists/creating-gists"
+                                target="_blank">GitHub Gist</a></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-icon">🔑</span>
+                        <span><a href="https://github.com/settings/tokens/new?scopes=gist&description=HN%20Reading%20List"
+                                target="_blank">Create a token</a> with only "gist" scope</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-icon">🔒</span>
+                        <span>Your token stays in your browser, data stored in your private gist</span>
+                    </div>
+                </div>
+                <div class="settings-row">
+                    <input type="password" id="ghToken" placeholder="GitHub token (ghp_...)" />
+                    <button class="btn btn-primary" id="saveTokenBtn">Save</button>
+                </div>
+                <div class="help-text">
+                    <a href="#" id="gistLink" target="_blank" style="display:none;">View data ↗</a>
+                    <a href="#" id="disconnectLink" style="display:none;"
+                        onclick="document.getElementById('ghToken').value=''; document.getElementById('saveTokenBtn').click(); return false;">Disconnect
+                        ×</a>
+                </div>
+            </div>
+
+            <div class="error-msg" id="error" role="alert"></div>
+        </nav>
+
+        <section class="results" id="results" aria-label="Stories list" aria-live="polite"></section>
+
+        <footer style="text-align: center; padding: 24px 16px; font-size: 12px; color: #94a3b8;">
+            <p>Data from <a href="https://hn.algolia.com/" target="_blank" rel="noopener"
+                    style="color: #3b82f6;">Algolia HN API</a> ·
+                <a href="https://github.com/taabishm2/readhn" target="_blank" rel="noopener"
+                    style="color: #3b82f6;">GitHub</a> ·
+                <a href="https://github.com/taabishm2/readhn/issues" target="_blank" rel="noopener"
+                    style="color: #3b82f6;">Report Issue</a>
+            </p>
+        </footer>
+    </main>
+
+    <script>
+        const ALGOLIA_ENDPOINT = "https://hn.algolia.com/api/v1/search_by_date";
+        const STORAGE_KEY = "hn-reading-list";
+        const TOKEN_KEY = "hn-reading-list-token";
+        const GIST_ID_KEY = "hn-reading-list-gist-id";
+        const GIST_FILENAME = "hn-reading-list.json";
+        const $ = (sel) => document.querySelector(sel);
+        const pad2 = (n) => (n < 10 ? "0" + n : "" + n);
+
+        // ==================== Local Storage ====================
+        function loadLocalState() {
+            try {
+                const data = localStorage.getItem(STORAGE_KEY);
+                return data ? JSON.parse(data) : { posts: {}, lastMonth: null, goal: 15 };
+            } catch {
+                return { posts: {}, lastMonth: null, goal: 15 };
+            }
+        }
+
+        function saveLocalState(state) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state, null, 2));
+        }
+
+        let cachedState = null;
+        let localChangedSinceSync = false; // Track if local state changed since last sync
+
+        function loadState() {
+            if (!cachedState) cachedState = loadLocalState();
+            return cachedState;
+        }
+
+        function saveState(state) {
+            cachedState = state;
+            saveLocalState(state);
+            localChangedSinceSync = true;
+            debouncedSync();
+        }
+
+        function getPostStatus(objectId) {
+            const state = loadState();
+            return state.posts[objectId]?.status || "unread";
+        }
+
+        function setPostStatus(objectId, status) {
+            const state = loadState();
+            if (status === "unread") {
+                delete state.posts[objectId];
+            } else {
+                state.posts[objectId] = { status };
+            }
+            saveState(state);
+        }
+
+        function saveSettings(month, goal) {
+            const state = loadState();
+            state.lastMonth = month;
+            state.goal = goal;
+            saveState(state);
+        }
+
+        function getSettings() {
+            const state = loadState();
+            return { lastMonth: state.lastMonth, goal: state.goal || 15 };
+        }
+
+        function clearAllData() {
+            cachedState = { posts: {} };
+            saveLocalState(cachedState);
+            localChangedSinceSync = true;
+            debouncedSync();
+        }
+
+        // ==================== GitHub Gist Sync ====================
+        function getToken() { return localStorage.getItem(TOKEN_KEY); }
+        function setToken(token) {
+            if (token) localStorage.setItem(TOKEN_KEY, token);
+            else localStorage.removeItem(TOKEN_KEY);
+        }
+        function getGistId() { return localStorage.getItem(GIST_ID_KEY); }
+        function setGistId(id) {
+            if (id) localStorage.setItem(GIST_ID_KEY, id);
+            else localStorage.removeItem(GIST_ID_KEY);
+        }
+
+        function updateSyncUI(status, text) {
+            const el = $('#syncIndicator');
+            el.className = `sync-indicator ${status}`;
+            const icons = {
+                offline: '<path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/>',
+                syncing: '<path d="M21 12a9 9 0 11-9-9"/><path d="M21 3v6h-6"/>',
+                synced: '<path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/>',
+                error: '<circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/>'
+            };
+            el.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${icons[status] || icons.offline}</svg><span>${text}</span>`;
+        }
+
+        function updateGistLink() {
+            const gistId = getGistId();
+            const token = getToken();
+            const gistLink = $('#gistLink');
+            const disconnectLink = $('#disconnectLink');
+
+            if (gistId) {
+                gistLink.href = `https://gist.github.com/${gistId}`;
+                gistLink.style.display = 'inline';
+            } else {
+                gistLink.style.display = 'none';
+            }
+
+            disconnectLink.style.display = token ? 'inline' : 'none';
+        }
+
+        async function createGist(token, content) {
+            const resp = await fetch('https://api.github.com/gists', {
+                method: 'POST',
+                headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    description: 'HN Reading List',
+                    public: false,
+                    files: { [GIST_FILENAME]: { content: JSON.stringify(content, null, 2) } }
+                })
+            });
+            if (!resp.ok) throw new Error(`GitHub error: ${resp.status}`);
+            return resp.json();
+        }
+
+        async function updateGist(token, gistId, content) {
+            const resp = await fetch(`https://api.github.com/gists/${gistId}`, {
+                method: 'PATCH',
+                headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ files: { [GIST_FILENAME]: { content: JSON.stringify(content, null, 2) } } })
+            });
+            if (!resp.ok) {
+                if (resp.status === 404) { setGistId(null); return createGist(token, content); }
+                throw new Error(`GitHub error: ${resp.status}`);
+            }
+            return resp.json();
+        }
+
+        async function fetchGist(token, gistId) {
+            const resp = await fetch(`https://api.github.com/gists/${gistId}`, {
+                headers: { 'Authorization': `token ${token}` }
+            });
+            if (!resp.ok) return resp.status === 404 ? null : null;
+            return resp.json();
+        }
+
+        function statesAreEqual(a, b) {
+            const aKeys = Object.keys(a.posts || {}).sort();
+            const bKeys = Object.keys(b.posts || {}).sort();
+            if (aKeys.length !== bKeys.length) return false;
+            for (let i = 0; i < aKeys.length; i++) {
+                if (aKeys[i] !== bKeys[i] || a.posts[aKeys[i]]?.status !== b.posts[bKeys[i]]?.status) return false;
+            }
+            return true;
+        }
+
+        let syncTimeout = null, isSyncing = false, pendingSync = false;
+        let lastSyncedAt = null;
+
+        function getRelativeTime(date) {
+            if (!date) return '';
+            const seconds = Math.floor((Date.now() - date) / 1000);
+            if (seconds < 60) return 'just now';
+            const minutes = Math.floor(seconds / 60);
+            if (minutes < 60) return `${minutes}m ago`;
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) return `${hours}h ago`;
+            return `${Math.floor(hours / 24)}d ago`;
+        }
+
+        function updateSyncTimeDisplay() {
+            if (lastSyncedAt && !isSyncing) {
+                const el = $('#syncIndicator');
+                const span = el.querySelector('span');
+                if (span && el.classList.contains('synced')) {
+                    span.textContent = getRelativeTime(lastSyncedAt);
+                }
+            }
+        }
+
+        // Update sync time display every minute
+        setInterval(updateSyncTimeDisplay, 60000);
+
+        async function syncWithGist() {
+            const token = getToken();
+            if (!token) { updateSyncUI('offline', 'Offline'); return; }
+            if (isSyncing) { pendingSync = true; return; }
+
+            isSyncing = true;
+            const hadLocalChanges = localChangedSinceSync;
+            localChangedSinceSync = false;
+            updateSyncUI('syncing', 'Syncing');
+
+            try {
+                let gistId = getGistId();
+                const localStateNow = loadLocalState();
+
+                if (gistId) {
+                    const gist = await fetchGist(token, gistId);
+                    if (gist?.files[GIST_FILENAME]) {
+                        const remoteState = JSON.parse(gist.files[GIST_FILENAME].content);
+
+                        if (hadLocalChanges) {
+                            // We have local changes - push local state to remote, don't merge
+                            if (!statesAreEqual(localStateNow, remoteState)) {
+                                await updateGist(token, gistId, localStateNow);
+                            }
+                        } else {
+                            // No local changes - safe to merge remote entries we don't have
+                            const merged = { posts: { ...localStateNow.posts } };
+                            for (const [id, data] of Object.entries(remoteState.posts || {})) {
+                                if (!(id in localStateNow.posts)) merged.posts[id] = { ...data };
+                            }
+                            if (!statesAreEqual(localStateNow, merged)) {
+                                saveLocalState(merged);
+                                cachedState = merged;
+                            }
+                            if (!statesAreEqual(remoteState, merged)) {
+                                await updateGist(token, gistId, merged);
+                            }
+                        }
+                    } else {
+                        await updateGist(token, gistId, localStateNow);
+                    }
+                } else {
+                    const gist = await createGist(token, localStateNow);
+                    setGistId(gist.id);
+                }
+                lastSyncedAt = Date.now();
+                updateSyncUI('synced', 'just now');
+                updateGistLink();
+                $('#settingsPanel').classList.remove('open');
+                if (allFetchedStories.length > 0) rerender();
+            } catch (err) {
+                console.error('Sync error:', err);
+                updateSyncUI('error', 'Error');
+            } finally {
+                isSyncing = false;
+            }
+        }
+
+        function debouncedSync() {
+            if (!getToken()) return;
+            if (syncTimeout) clearTimeout(syncTimeout);
+            syncTimeout = setTimeout(async () => {
+                if (isSyncing) { pendingSync = true; return; }
+                await syncWithGist();
+                if (pendingSync) { pendingSync = false; debouncedSync(); }
+            }, 2000);
+        }
+
+        async function initialSync() {
+            const token = getToken();
+            if (token) {
+                $('#ghToken').value = '••••••••••••••••';
+                await syncWithGist();
+            } else {
+                updateSyncUI('offline', 'Offline');
+            }
+        }
+
+        // ==================== Date Utilities ====================
+        function monthInputToRangeUtc(monthValue) {
+            const m = /^(\d{4})-(\d{2})$/.exec(monthValue);
+            if (!m) throw new Error("Invalid month format.");
+            const year = Number(m[1]), month = Number(m[2]) - 1;
+            return {
+                start: new Date(Date.UTC(year, month, 1)),
+                end: new Date(Date.UTC(year, month + 1, 1))
+            };
+        }
+
+        const toUnix = (d) => Math.floor(d.getTime() / 1000);
+
+        function adjustMonth(delta) {
+            const input = $('#monthInput');
+            const m = /^(\d{4})-(\d{2})$/.exec(input.value);
+            if (!m) return;
+            let year = Number(m[1]), month = Number(m[2]) + delta;
+            if (month < 1) { year--; month = 12; }
+            else if (month > 12) { year++; month = 1; }
+            input.value = `${year}-${pad2(month)}`;
+        }
+
+        function getPreviousMonth() {
+            const now = new Date();
+            let year = now.getFullYear(), month = now.getMonth();
+            if (month === 0) { year--; month = 12; }
+            return `${year}-${pad2(month)}`;
+        }
+
+        // ==================== API ====================
+        async function fetchStories(startUnix, endUnix) {
+            const hits = [];
+            let page = 0;
+            while (true) {
+                const url = new URL(ALGOLIA_ENDPOINT);
+                url.searchParams.set("tags", "story");
+                url.searchParams.set("hitsPerPage", "1000");
+                url.searchParams.set("page", String(page));
+                url.searchParams.set("numericFilters", `created_at_i>=${startUnix},created_at_i<${endUnix}`);
+                const resp = await fetch(url);
+                if (!resp.ok) throw new Error(`API error: ${resp.status}`);
+                const data = await resp.json();
+                if (!data.hits?.length) break;
+                hits.push(...data.hits);
+                if (++page >= (data.nbPages || 0) || page > 50) break;
+            }
+            return hits;
+        }
+
+        function normalize(hit) {
+            return {
+                id: hit.objectID,
+                title: hit.title || hit.story_title || "(untitled)",
+                url: hit.url || hit.story_url || null,
+                points: hit.points || 0,
+                comments: hit.num_comments || 0,
+                hnUrl: hit.objectID ? `https://news.ycombinator.com/item?id=${hit.objectID}` : null
+            };
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        }
+
+        // ==================== Confirm Dialog ====================
+        function showConfirm(title, message, confirmText = 'Confirm') {
+            return new Promise((resolve) => {
+                const overlay = document.createElement('div');
+                overlay.className = 'confirm-overlay';
+                overlay.innerHTML = `
+                    <div class="confirm-dialog">
+                        <h3>${escapeHtml(title)}</h3>
+                        <p>${escapeHtml(message)}</p>
+                        <div class="dialog-actions">
+                            <button class="btn btn-ghost" data-action="cancel">Cancel</button>
+                            <button class="btn btn-primary" data-action="confirm">${escapeHtml(confirmText)}</button>
+                        </div>
+                    </div>`;
+                document.body.appendChild(overlay);
+                overlay.addEventListener('click', (e) => {
+                    const btn = e.target.closest('[data-action]');
+                    if (btn) {
+                        document.body.removeChild(overlay);
+                        resolve(btn.dataset.action === 'confirm');
+                    } else if (e.target === overlay) {
+                        document.body.removeChild(overlay);
+                        resolve(false);
+                    }
+                });
+            });
+        }
+
+        // ==================== Rendering ====================
+        let currentStories = [], allFetchedStories = [];
+
+        function render(stories, topN) {
+            const container = $('#results');
+            const visibleStories = stories.filter(s => getPostStatus(s.id) !== "ignored");
+            currentStories = visibleStories;
+
+            if (!visibleStories.length) {
+                container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📭</div><div>No stories found</div></div>`;
+                updateProgress(0, 0);
+                return;
+            }
+
+            const displayStories = visibleStories.slice(0, topN);
+            updateProgress(displayStories);
+
+            container.innerHTML = displayStories.map((s, i) => {
+                const status = getPostStatus(s.id);
+                return `
+                <div class="story status-${status}" data-id="${s.id}">
+                    <div class="rank">${i + 1}</div>
+                    <div class="read-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>
+                    <div class="story-body">
+                        <div class="story-title"><a href="${s.url || s.hnUrl || '#'}" target="_blank">${escapeHtml(s.title)}</a></div>
+                        <div class="story-meta">${s.points} points · <a href="${s.hnUrl}" target="_blank" class="comments-link">${s.comments} comments</a></div>
+                    </div>
+                    <div class="story-actions">
+                        ${status === 'unread'
+                        ? `<button class="action-btn btn-read" data-action="read" data-id="${s.id}" title="Mark as read" aria-label="Mark as read"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>Read</span></button>`
+                        : `<button class="action-btn btn-unread" data-action="unread" data-id="${s.id}" title="Mark as unread" aria-label="Mark as unread"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg><span>Unread</span></button>`
+                    }
+                        <button class="action-btn btn-icon-only btn-ignore" data-action="ignore" data-id="${s.id}" title="Hide permanently" aria-label="Hide permanently"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function updateProgress(stories) {
+            const goal = Number($('#topN').value);
+            const read = Array.isArray(stories) ? stories.filter(s => getPostStatus(s.id) === 'read').length : 0;
+            const pct = goal > 0 ? Math.min((read / goal) * 100, 100) : 0;
+            $('#progressFill').style.width = `${pct}%`;
+            $('#progressText').textContent = `${read}/${goal}`;
+
+            const completeMsg = $('#completeMsg');
+            if (read >= goal && goal > 0) {
+                completeMsg.textContent = '🎉 Goal complete!';
+                completeMsg.style.display = 'inline';
+            } else {
+                completeMsg.style.display = 'none';
+            }
+        }
+
+        function setError(text) { $('#error').textContent = text; }
+
+        function rerender() {
+            const topN = Number($('#topN').value);
+            render(allFetchedStories, topN);
+        }
+
+        // ==================== Actions ====================
+        let lastChangedId = null;
+
+        async function handleAction(action, id) {
+            if (action === 'read') {
+                lastChangedId = id;
+                setPostStatus(id, 'read');
+                rerender();
+                flashStory(id);
+            } else if (action === 'unread') {
+                lastChangedId = id;
+                setPostStatus(id, 'unread');
+                rerender();
+                flashStory(id);
+            } else if (action === 'ignore') {
+                const story = currentStories.find(s => s.id === id);
+                const title = story?.title || 'this post';
+                if (await showConfirm('Hide permanently?', `"${title.substring(0, 50)}${title.length > 50 ? '...' : ''}" will be hidden forever. This cannot be undone.`, 'Hide')) {
+                    setPostStatus(id, 'ignored');
+                    rerender();
+                }
+            }
+        }
+
+        function flashStory(id) {
+            requestAnimationFrame(() => {
+                const el = document.querySelector(`.story[data-id="${id}"]`);
+                if (el) {
+                    el.classList.add('just-changed');
+                    setTimeout(() => el.classList.remove('just-changed'), 400);
+                }
+            });
+        }
+
+        // ==================== Load ====================
+        async function load() {
+            setError("");
+            const monthValue = $('#monthInput').value;
+            const topN = Number($('#topN').value);
+            if (!monthValue) { setError("Select a month"); return; }
+
+            const { start, end } = monthInputToRangeUtc(monthValue);
+            const skeletonCount = topN > 15 ? 10 : 5;
+            $('#results').innerHTML = Array(skeletonCount).fill(`
+                <div class="skeleton-story">
+                    <div class="skeleton skeleton-rank"></div>
+                    <div class="skeleton-body">
+                        <div class="skeleton skeleton-title"></div>
+                        <div class="skeleton skeleton-meta"></div>
+                    </div>
+                </div>
+            `).join('');
+
+            try {
+                const rawHits = await fetchStories(toUnix(start), toUnix(end));
+                allFetchedStories = rawHits.map(normalize).filter(s => s.title && s.points >= 0).sort((a, b) => b.points - a.points);
+                render(allFetchedStories, topN);
+            } catch (err) {
+                setError(err.message);
+                $('#results').innerHTML = '';
+            }
+        }
+
+        // ==================== Event Handlers ====================
+        $('#prevMonth').addEventListener('click', () => {
+            adjustMonth(-1);
+            saveSettings($('#monthInput').value, Number($('#topN').value));
+            load();
+        });
+        $('#nextMonth').addEventListener('click', () => {
+            adjustMonth(1);
+            saveSettings($('#monthInput').value, Number($('#topN').value));
+            load();
+        });
+        $('#monthInput').addEventListener('change', () => {
+            saveSettings($('#monthInput').value, Number($('#topN').value));
+            load();
+        });
+        $('#topN').addEventListener('change', () => {
+            const topN = Number($('#topN').value);
+            saveSettings($('#monthInput').value, topN);
+            render(allFetchedStories, topN);
+        });
+
+        $('#results').addEventListener('click', (e) => {
+            const btn = e.target.closest('.action-btn');
+            if (btn) handleAction(btn.dataset.action, btn.dataset.id);
+        });
+
+        $('#syncIndicator').addEventListener('click', () => {
+            $('#settingsPanel').classList.toggle('open');
+        });
+
+        async function validateToken(token) {
+            try {
+                const resp = await fetch('https://api.github.com/user', {
+                    headers: { 'Authorization': `token ${token}` }
+                });
+                return resp.ok;
+            } catch {
+                return false;
+            }
+        }
+
+        $('#saveTokenBtn').addEventListener('click', async () => {
+            const token = $('#ghToken').value.trim();
+            if (!token) {
+                // Clear token (disconnect)
+                setToken(null);
+                setGistId(null);
+                updateSyncUI('offline', 'Offline');
+                updateGistLink();
+                setError('');
+                return;
+            }
+            if (token === '••••••••••••••••') {
+                // Token already saved, just sync
+                await syncWithGist();
+                return;
+            }
+
+            // Validate token before saving
+            updateSyncUI('syncing', 'Validating...');
+            const isValid = await validateToken(token);
+            if (!isValid) {
+                updateSyncUI('error', 'Invalid token');
+                setError('Token validation failed. Check the token and try again.');
+                return;
+            }
+
+            setError('');
+            setToken(token);
+            $('#ghToken').value = '••••••••••••••••';
+            await syncWithGist();
+        });
+
+        $('#resetDataBtn').addEventListener('click', async () => {
+            if (await showConfirm('Reset all data?', 'This will clear all your progress, including read, unread, and ignored posts.', 'Reset')) {
+                clearAllData();
+                rerender();
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+            if (e.key === 'ArrowLeft') { adjustMonth(-1); load(); }
+            if (e.key === 'ArrowRight') { adjustMonth(1); load(); }
+            if (e.key === 'r' || e.key === 'R') load();
+        });
+
+        // Init
+        const savedSettings = getSettings();
+        $('#monthInput').value = savedSettings.lastMonth || getPreviousMonth();
+        $('#topN').value = savedSettings.goal || 15;
+        load();
+        initialSync();
+        updateGistLink();
+    </script>
+</body>
+
+</html>
