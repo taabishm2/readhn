@@ -1055,19 +1055,28 @@
 
         // Auto-discover existing gist with our filename
         async function findExistingGist(token) {
+            console.log('[Sync] Searching for existing gist with filename:', GIST_FILENAME);
             try {
                 const resp = await fetch('https://api.github.com/gists?per_page=100', {
                     headers: { 'Authorization': `token ${token}` }
                 });
-                if (!resp.ok) return null;
+                if (!resp.ok) {
+                    console.log('[Sync] Failed to fetch gists list, status:', resp.status);
+                    return null;
+                }
                 const gists = await resp.json();
+                console.log('[Sync] Found', gists.length, 'gists in account');
                 for (const gist of gists) {
+                    const filenames = Object.keys(gist.files || {});
+                    console.log('[Sync] Checking gist', gist.id, '- files:', filenames.join(', '));
                     if (gist.files && gist.files[GIST_FILENAME]) {
+                        console.log('[Sync] ✓ Found matching gist:', gist.id);
                         return gist.id;
                     }
                 }
+                console.log('[Sync] No existing gist found with our filename');
             } catch (err) {
-                console.error('Error finding existing gist:', err);
+                console.error('[Sync] Error finding existing gist:', err);
             }
             return null;
         }
@@ -1111,8 +1120,9 @@
 
         async function syncWithGist() {
             const token = getToken();
+            console.log('[Sync] syncWithGist called, token exists:', !!token);
             if (!token) { updateSyncUI('offline', 'Offline'); return; }
-            if (isSyncing) { pendingSync = true; return; }
+            if (isSyncing) { console.log('[Sync] Already syncing, queuing'); pendingSync = true; return; }
 
             isSyncing = true;
             const hadLocalChanges = localChangedSinceSync;
@@ -1121,10 +1131,13 @@
 
             try {
                 let gistId = getGistId();
+                console.log('[Sync] Stored gistId from localStorage:', gistId);
                 const localStateNow = loadLocalState();
 
                 if (gistId) {
+                    console.log('[Sync] Using stored gistId:', gistId);
                     const gist = await fetchGist(token, gistId);
+                    console.log('[Sync] Fetched gist, has our file:', !!(gist?.files[GIST_FILENAME]));
                     if (gist?.files[GIST_FILENAME]) {
                         const remoteState = JSON.parse(gist.files[GIST_FILENAME].content);
 
@@ -1152,9 +1165,12 @@
                     }
                 } else {
                     // No gist ID stored - try to find existing gist first
+                    console.log('[Sync] No stored gistId, searching for existing gist...');
                     const existingGistId = await findExistingGist(token);
+                    console.log('[Sync] findExistingGist returned:', existingGistId);
                     if (existingGistId) {
                         // Found existing gist - use it and merge
+                        console.log('[Sync] ✓ Using discovered gist:', existingGistId);
                         setGistId(existingGistId);
                         const gist = await fetchGist(token, existingGistId);
                         if (gist?.files[GIST_FILENAME]) {
@@ -1167,7 +1183,7 @@
                             // Preserve settings from remote if local doesn't have them
                             if (remoteState.lastMonth && !localStateNow.lastMonth) merged.lastMonth = remoteState.lastMonth;
                             if (remoteState.goal && !localStateNow.goal) merged.goal = remoteState.goal;
-                            
+
                             saveLocalState(merged);
                             cachedState = merged;
                             // Push merged state back
@@ -1175,17 +1191,20 @@
                         }
                     } else {
                         // No existing gist found - create new one
+                        console.log('[Sync] ✗ No existing gist found, creating new one...');
                         const gist = await createGist(token, localStateNow);
+                        console.log('[Sync] Created new gist with id:', gist.id);
                         setGistId(gist.id);
                     }
                 }
                 lastSyncedAt = Date.now();
+                console.log('[Sync] ✓ Sync completed successfully, final gistId:', getGistId());
                 updateSyncUI('synced', 'just now');
                 updateGistLink();
                 $('#settingsPanel').classList.remove('open');
                 if (allFetchedStories.length > 0) rerender();
             } catch (err) {
-                console.error('Sync error:', err);
+                console.error('[Sync] ✗ Sync error:', err);
                 updateSyncUI('error', 'Error');
             } finally {
                 isSyncing = false;
