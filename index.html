@@ -1053,6 +1053,25 @@
             return resp.json();
         }
 
+        // Auto-discover existing gist with our filename
+        async function findExistingGist(token) {
+            try {
+                const resp = await fetch('https://api.github.com/gists?per_page=100', {
+                    headers: { 'Authorization': `token ${token}` }
+                });
+                if (!resp.ok) return null;
+                const gists = await resp.json();
+                for (const gist of gists) {
+                    if (gist.files && gist.files[GIST_FILENAME]) {
+                        return gist.id;
+                    }
+                }
+            } catch (err) {
+                console.error('Error finding existing gist:', err);
+            }
+            return null;
+        }
+
         function statesAreEqual(a, b) {
             const aKeys = Object.keys(a.posts || {}).sort();
             const bKeys = Object.keys(b.posts || {}).sort();
@@ -1132,8 +1151,33 @@
                         await updateGist(token, gistId, localStateNow);
                     }
                 } else {
-                    const gist = await createGist(token, localStateNow);
-                    setGistId(gist.id);
+                    // No gist ID stored - try to find existing gist first
+                    const existingGistId = await findExistingGist(token);
+                    if (existingGistId) {
+                        // Found existing gist - use it and merge
+                        setGistId(existingGistId);
+                        const gist = await fetchGist(token, existingGistId);
+                        if (gist?.files[GIST_FILENAME]) {
+                            const remoteState = JSON.parse(gist.files[GIST_FILENAME].content);
+                            // Merge remote into local (remote wins for entries we don't have)
+                            const merged = { posts: { ...localStateNow.posts } };
+                            for (const [id, data] of Object.entries(remoteState.posts || {})) {
+                                if (!(id in localStateNow.posts)) merged.posts[id] = { ...data };
+                            }
+                            // Preserve settings from remote if local doesn't have them
+                            if (remoteState.lastMonth && !localStateNow.lastMonth) merged.lastMonth = remoteState.lastMonth;
+                            if (remoteState.goal && !localStateNow.goal) merged.goal = remoteState.goal;
+                            
+                            saveLocalState(merged);
+                            cachedState = merged;
+                            // Push merged state back
+                            await updateGist(token, existingGistId, merged);
+                        }
+                    } else {
+                        // No existing gist found - create new one
+                        const gist = await createGist(token, localStateNow);
+                        setGistId(gist.id);
+                    }
                 }
                 lastSyncedAt = Date.now();
                 updateSyncUI('synced', 'just now');
