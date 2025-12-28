@@ -270,6 +270,11 @@
             max-width: 120px;
         }
 
+        .controls-label {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
         input[type="month"]:focus,
         select:focus {
             outline: none;
@@ -479,30 +484,13 @@
             background: var(--surface-hover);
         }
 
-        /* Read state - subtle checkmark and muted text */
+        /* Read state - muted text with green left border */
+        .story.status-read {
+            border-left: 3px solid var(--green);
+        }
+
         .story.status-read .story-title a {
             color: var(--text-muted);
-        }
-
-        .story.status-read .read-check {
-            display: flex;
-        }
-
-        .read-check {
-            display: none;
-            width: 16px;
-            height: 16px;
-            background: var(--green);
-            border-radius: 50%;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .read-check svg {
-            width: 10px;
-            height: 10px;
-            color: white;
         }
 
         /* Unread - just normal styling, no special background */
@@ -512,11 +500,21 @@
         }
 
         .rank {
-            min-width: 24px;
+            min-width: 44px;
             font-size: 12px;
-            font-weight: 500;
-            color: var(--text-muted);
-            text-align: center;
+            font-weight: 600;
+            color: var(--accent);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1px;
+            flex-shrink: 0;
+        }
+
+        .rank svg {
+            width: 10px;
+            height: 10px;
         }
 
         .story-body {
@@ -557,7 +555,7 @@
         .story-actions {
             display: flex;
             align-items: center;
-            gap: 2px;
+            gap: 4px;
             opacity: 0;
             transition: opacity 0.15s;
         }
@@ -567,24 +565,22 @@
         }
 
         .action-btn {
-            height: 26px;
+            width: 28px;
+            height: 28px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 4px;
-            padding: 0 8px;
+            padding: 0;
             border: none;
             border-radius: 6px;
             background: transparent;
             color: var(--text-muted);
             cursor: pointer;
             transition: all 0.15s;
-            font-size: 11px;
-            font-weight: 500;
         }
 
         .action-btn.btn-icon-only {
-            width: 26px;
+            width: 28px;
             padding: 0;
         }
 
@@ -603,15 +599,85 @@
             color: var(--blue);
         }
 
+        .action-btn.btn-like {
+            color: var(--text-muted);
+        }
+
+        .action-btn.btn-like:hover {
+            background: var(--red-light);
+            color: var(--red);
+        }
+
+        .action-btn.btn-like.liked {
+            color: var(--red);
+        }
+
+        .action-btn.btn-like.liked svg {
+            fill: var(--red);
+        }
+
         .action-btn.btn-ignore:hover {
             background: var(--red-light);
             color: var(--red);
         }
 
         .action-btn svg {
-            width: 14px;
-            height: 14px;
+            width: 16px;
+            height: 16px;
             flex-shrink: 0;
+        }
+
+        /* Read toggle button */
+        .action-btn.btn-read-toggle {
+            color: var(--text-muted);
+        }
+
+        .action-btn.btn-read-toggle:hover {
+            background: var(--green-light);
+            color: var(--green);
+        }
+
+        .action-btn.btn-read-toggle.is-read {
+            color: var(--green);
+        }
+
+        .action-btn.btn-read-toggle.is-read:hover {
+            background: var(--surface-hover);
+            color: var(--text-muted);
+        }
+
+        /* Saved posts button */
+        .btn-saved {
+            font-family: inherit;
+            font-size: 13px;
+            padding: 6px 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--surface);
+            color: var(--text);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            height: 32px;
+            transition: all 0.15s;
+        }
+
+        .btn-saved:hover {
+            border-color: var(--text-muted);
+            background: var(--surface-hover);
+        }
+
+        .btn-saved.active {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-light);
+        }
+
+        .btn-saved svg {
+            width: 12px;
+            height: 12px;
+            fill: var(--red);
         }
 
         .action-btn span {
@@ -707,6 +773,33 @@
 
             100% {
                 background: transparent;
+                transform: scale(1);
+            }
+        }
+
+        /* Heart/save animation */
+        .action-btn.btn-like.just-liked {
+            animation: heartPop 0.4s ease;
+        }
+
+        @keyframes heartPop {
+            0% {
+                transform: scale(1);
+            }
+
+            25% {
+                transform: scale(1.4);
+            }
+
+            50% {
+                transform: scale(0.9);
+            }
+
+            75% {
+                transform: scale(1.15);
+            }
+
+            100% {
                 transform: scale(1);
             }
         }
@@ -835,20 +928,29 @@
 
         <nav class="controls" aria-label="Month navigation and settings">
             <div class="controls-row">
-                <div class="nav-btns">
-                    <button class="nav-btn" id="prevMonth" title="Previous month (← key)"
-                        aria-label="Previous month">←</button>
-                    <button class="nav-btn" id="nextMonth" title="Next month (→ key)" aria-label="Next month">→</button>
-                </div>
+                <select id="topN" title="Number of posts to show" aria-label="Number of posts to show">
+                    <option value="15" selected>Top 15</option>
+                    <option value="25">Top 25</option>
+                    <option value="50">Top 50</option>
+                    <option value="100">Top 100</option>
+                </select>
+
+                <span class="controls-label">of</span>
+
+                <button class="nav-btn" id="prevMonth" title="Previous month (← key)"
+                    aria-label="Previous month">←</button>
 
                 <input type="month" id="monthInput" title="Select month to view" aria-label="Select month" />
 
-                <select id="topN" title="Monthly reading goal" aria-label="Reading goal">
-                    <option value="15" selected>Goal: 15</option>
-                    <option value="25">Goal: 25</option>
-                    <option value="50">Goal: 50</option>
-                    <option value="100">Goal: 100</option>
-                </select>
+                <button class="nav-btn" id="nextMonth" title="Next month (→ key)" aria-label="Next month">→</button>
+
+                <button class="btn-saved" id="savedBtn" title="View saved posts" aria-label="View saved posts">
+                    <svg viewBox="0 0 24 24" stroke="#ef4444" stroke-width="2">
+                        <path
+                            d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                    </svg>
+                    <span id="savedCount">0</span>
+                </button>
 
                 <div class="spacer"></div>
 
@@ -952,11 +1054,45 @@
         function setPostStatus(objectId, status) {
             const state = loadState();
             if (status === "unread") {
-                delete state.posts[objectId];
+                // Keep liked state if exists
+                if (state.posts[objectId]?.liked) {
+                    state.posts[objectId] = { liked: true };
+                } else {
+                    delete state.posts[objectId];
+                }
             } else {
-                state.posts[objectId] = { status };
+                state.posts[objectId] = { ...state.posts[objectId], status };
             }
             saveState(state);
+        }
+
+        function isPostLiked(objectId) {
+            const state = loadState();
+            return state.posts[objectId]?.liked || false;
+        }
+
+        function setPostLiked(objectId, liked) {
+            const state = loadState();
+            if (!state.posts[objectId]) {
+                state.posts[objectId] = {};
+            }
+            if (liked) {
+                state.posts[objectId].liked = true;
+            } else {
+                delete state.posts[objectId].liked;
+                // Clean up if no status or liked
+                if (!state.posts[objectId].status) {
+                    delete state.posts[objectId];
+                }
+            }
+            saveState(state);
+        }
+
+        function getLikedPosts() {
+            const state = loadState();
+            return Object.entries(state.posts)
+                .filter(([id, data]) => data.liked)
+                .map(([id]) => id);
         }
 
         function saveSettings(month, goal) {
@@ -1161,9 +1297,14 @@
                             }
                         }
                     } else {
-                        await updateGist(token, gistId, localStateNow);
+                        // Stored gist doesn't exist or is invalid - clear it and try auto-discovery
+                        console.log('[Sync] Stored gist not found (404), clearing and trying auto-discovery...');
+                        setGistId(null);
+                        gistId = null;
                     }
-                } else {
+                }
+
+                if (!gistId) {
                     // No gist ID stored - try to find existing gist first
                     console.log('[Sync] No stored gistId, searching for existing gist...');
                     const existingGistId = await findExistingGist(token);
@@ -1326,6 +1467,7 @@
 
         // ==================== Rendering ====================
         let currentStories = [], allFetchedStories = [];
+        let showingSaved = false;
 
         function render(stories, topN) {
             const container = $('#results');
@@ -1333,33 +1475,47 @@
             currentStories = visibleStories;
 
             if (!visibleStories.length) {
-                container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📭</div><div>No stories found</div></div>`;
+                container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">${showingSaved ? '❤️' : '📭'}</div><div>${showingSaved ? 'No saved posts yet' : 'No stories found'}</div></div>`;
                 updateProgress(0, 0);
+                updateSavedCount();
                 return;
             }
 
-            const displayStories = visibleStories.slice(0, topN);
+            const displayStories = showingSaved ? visibleStories : visibleStories.slice(0, topN);
             updateProgress(displayStories);
 
             container.innerHTML = displayStories.map((s, i) => {
                 const status = getPostStatus(s.id);
+                const isRead = status === 'read';
+                const liked = isPostLiked(s.id);
                 return `
                 <div class="story status-${status}" data-id="${s.id}">
-                    <div class="rank">${i + 1}</div>
-                    <div class="read-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>
+                    <div class="rank"><svg viewBox="0 0 24 24" fill="currentColor" width="10" height="10"><path d="M12 4l-8 8h16z"/></svg>${s.points}</div>
                     <div class="story-body">
                         <div class="story-title"><a href="${s.url || s.hnUrl || '#'}" target="_blank">${escapeHtml(s.title)}</a></div>
-                        <div class="story-meta">${s.points} points · <a href="${s.hnUrl}" target="_blank" class="comments-link">${s.comments} comments</a></div>
+                        <div class="story-meta"><a href="${s.hnUrl}" target="_blank" class="comments-link">${s.comments} comments</a></div>
                     </div>
                     <div class="story-actions">
-                        ${status === 'unread'
-                        ? `<button class="action-btn btn-read" data-action="read" data-id="${s.id}" title="Mark as read" aria-label="Mark as read"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg><span>Read</span></button>`
-                        : `<button class="action-btn btn-unread" data-action="unread" data-id="${s.id}" title="Mark as unread" aria-label="Mark as unread"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg><span>Unread</span></button>`
+                        <button class="action-btn btn-read-toggle ${isRead ? 'is-read' : ''}" data-action="toggle-read" data-id="${s.id}" title="${isRead ? 'Mark as unread' : 'Mark as read'}" aria-label="${isRead ? 'Mark as unread' : 'Mark as read'}">
+                            ${isRead
+                        ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>`
+                        : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>`
                     }
-                        <button class="action-btn btn-icon-only btn-ignore" data-action="ignore" data-id="${s.id}" title="Hide permanently" aria-label="Hide permanently"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+                        </button>
+                        <button class="action-btn btn-like ${liked ? 'liked' : ''}" data-action="toggle-like" data-id="${s.id}" title="${liked ? 'Remove from saved' : 'Save post'}" aria-label="${liked ? 'Remove from saved' : 'Save post'}">
+                            <svg viewBox="0 0 24 24" fill="${liked ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                        </button>
+                        <button class="action-btn btn-ignore" data-action="ignore" data-id="${s.id}" title="Hide permanently" aria-label="Hide permanently"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14"/><path d="M10 11v6M14 11v6"/></svg></button>
                     </div>
                 </div>`;
             }).join('');
+
+            updateSavedCount();
+        }
+
+        function updateSavedCount() {
+            const count = getLikedPosts().length;
+            $('#savedCount').textContent = count;
         }
 
         function updateProgress(stories) {
@@ -1381,24 +1537,34 @@
         function setError(text) { $('#error').textContent = text; }
 
         function rerender() {
-            const topN = Number($('#topN').value);
-            render(allFetchedStories, topN);
+            if (showingSaved) {
+                // Re-filter saved stories in case one was unliked
+                savedStoriesCache = savedStoriesCache.filter(s => isPostLiked(s.id));
+                render(savedStoriesCache, savedStoriesCache.length);
+            } else {
+                const topN = Number($('#topN').value);
+                render(allFetchedStories, topN);
+            }
         }
 
         // ==================== Actions ====================
         let lastChangedId = null;
 
         async function handleAction(action, id) {
-            if (action === 'read') {
+            if (action === 'toggle-read') {
                 lastChangedId = id;
-                setPostStatus(id, 'read');
+                const currentStatus = getPostStatus(id);
+                setPostStatus(id, currentStatus === 'read' ? 'unread' : 'read');
                 rerender();
                 flashStory(id);
-            } else if (action === 'unread') {
-                lastChangedId = id;
-                setPostStatus(id, 'unread');
+            } else if (action === 'toggle-like') {
+                const currentlyLiked = isPostLiked(id);
+                setPostLiked(id, !currentlyLiked);
                 rerender();
-                flashStory(id);
+                if (!currentlyLiked) {
+                    // Just liked - animate the heart
+                    flashHeart(id);
+                }
             } else if (action === 'ignore') {
                 const story = currentStories.find(s => s.id === id);
                 const title = story?.title || 'this post';
@@ -1419,8 +1585,88 @@
             });
         }
 
+        function flashHeart(id) {
+            requestAnimationFrame(() => {
+                const btn = document.querySelector(`.story[data-id="${id}"] .btn-like`);
+                if (btn) {
+                    btn.classList.add('just-liked');
+                    setTimeout(() => btn.classList.remove('just-liked'), 400);
+                }
+            });
+        }
+
+        // ==================== Saved Posts View ====================
+        let savedStoriesCache = [];
+
+        async function loadSavedPosts() {
+            const likedIds = getLikedPosts();
+            if (!likedIds.length) {
+                savedStoriesCache = [];
+                rerender();
+                return;
+            }
+
+            // Fetch story details from HN API
+            const container = $('#results');
+            container.innerHTML = Array(Math.min(likedIds.length, 5)).fill(`
+                <div class="skeleton-story">
+                    <div class="skeleton skeleton-rank"></div>
+                    <div class="skeleton-body">
+                        <div class="skeleton skeleton-title"></div>
+                        <div class="skeleton skeleton-meta"></div>
+                    </div>
+                </div>
+            `).join('');
+
+            try {
+                const stories = await Promise.all(
+                    likedIds.map(async (id) => {
+                        try {
+                            const resp = await fetch(`https://hn.algolia.com/api/v1/items/${id}`);
+                            if (!resp.ok) return null;
+                            const hit = await resp.json();
+                            return {
+                                id: hit.id?.toString() || id,
+                                title: hit.title || "(untitled)",
+                                url: hit.url || null,
+                                points: hit.points || 0,
+                                comments: hit.children?.length || 0,
+                                hnUrl: `https://news.ycombinator.com/item?id=${id}`
+                            };
+                        } catch {
+                            return null;
+                        }
+                    })
+                );
+                savedStoriesCache = stories.filter(Boolean);
+                render(savedStoriesCache, savedStoriesCache.length);
+            } catch (err) {
+                setError('Failed to load saved posts');
+            }
+        }
+
+        function toggleSavedView() {
+            showingSaved = !showingSaved;
+            $('#savedBtn').classList.toggle('active', showingSaved);
+
+            if (showingSaved) {
+                loadSavedPosts();
+            } else {
+                load();
+            }
+        }
+
+        function exitSavedView() {
+            if (showingSaved) {
+                showingSaved = false;
+                $('#savedBtn').classList.remove('active');
+            }
+        }
+
         // ==================== Load ====================
         async function load() {
+            exitSavedView();
+
             setError("");
             const monthValue = $('#monthInput').value;
             const topN = Number($('#topN').value);
@@ -1464,9 +1710,14 @@
             load();
         });
         $('#topN').addEventListener('change', () => {
+            exitSavedView();
             const topN = Number($('#topN').value);
             saveSettings($('#monthInput').value, topN);
-            render(allFetchedStories, topN);
+            if (allFetchedStories.length > 0) {
+                render(allFetchedStories, topN);
+            } else {
+                load();
+            }
         });
 
         $('#results').addEventListener('click', (e) => {
@@ -1477,6 +1728,8 @@
         $('#syncIndicator').addEventListener('click', () => {
             $('#settingsPanel').classList.toggle('open');
         });
+
+        $('#savedBtn').addEventListener('click', toggleSavedView);
 
         async function validateToken(token) {
             try {
@@ -1530,6 +1783,7 @@
 
         document.addEventListener('keydown', (e) => {
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+            if (showingSaved) return; // Disable nav keys when viewing saved
             if (e.key === 'ArrowLeft') { adjustMonth(-1); load(); }
             if (e.key === 'ArrowRight') { adjustMonth(1); load(); }
             if (e.key === 'r' || e.key === 'R') load();
@@ -1542,6 +1796,7 @@
         load();
         initialSync();
         updateGistLink();
+        updateSavedCount();
     </script>
 </body>
 
