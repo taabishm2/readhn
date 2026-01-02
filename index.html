@@ -1611,12 +1611,8 @@
                     flashHeart(id);
                 }
             } else if (action === 'ignore') {
-                const story = currentStories.find(s => s.id === id);
-                const title = story?.title || 'this post';
-                if (await showConfirm('Hide permanently?', `"${title.substring(0, 50)}${title.length > 50 ? '...' : ''}" will be hidden forever. This cannot be undone.`, 'Hide')) {
-                    setPostStatus(id, 'ignored');
-                    rerender();
-                }
+                setPostStatus(id, 'ignored');
+                rerender();
             }
         }
 
