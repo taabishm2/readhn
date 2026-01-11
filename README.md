@@ -43,7 +43,3 @@ Issues and pull requests are welcome! Visit the [GitHub repository](https://gith
 ## License
 
 MIT License - feel free to use and modify for your own purposes.
-
----
-
-**Keywords:** Hacker News, HN, reading list, news reader, tech news, productivity, bookmarks, reading tracker, privacy, offline-first
